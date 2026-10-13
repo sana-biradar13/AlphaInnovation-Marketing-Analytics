@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Marketing Campaign Analytics Dashboard | Executive Performance & ROI</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              900: '#1e1b4b',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts & Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-[#0a0f1d] text-slate-100 min-h-screen">
+
+  <!-- Top Header Navigation -->
+  <header class="border-b border-white/10 bg-[#0f172a]/80 backdrop-blur-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
+      
+      <!-- Brand & Title -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20 text-white font-bold text-lg">
+          <i class="fa-solid fa-chart-line"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-lg font-bold text-white tracking-tight">Marketing Campaign Analytics</h1>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 font-medium border border-indigo-500/30">Enterprise Edition</span>
+          </div>
+          <p class="text-xs text-slate-400">Facebook Advertising Performance Dataset • XYZ Company (1,143 Ad Placements)</p>
+        </div>
+      </div>
+
+      <!-- Action & Economics Controls -->
+      <div class="flex items-center flex-wrap gap-3">
+        
+        <!-- Target Customer Value / AOV Slider -->
+        <div class="flex items-center gap-2.5 bg-slate-800/80 px-3 py-1.5 rounded-lg border border-white/10" title="Adjust the average revenue generated per Approved Conversion to simulate ROI and ROAS scenarios">
+          <div class="flex flex-col text-left">
+            <span class="text-[10px] uppercase font-bold tracking-wider text-slate-400">Customer Value (AOV)</span>
+            <span class="text-xs font-mono font-semibold text-emerald-400" id="aovDisplay">$100</span>
+          </div>
+          <input type="range" id="aovSlider" min="10" max="300" step="5" value="100" class="w-24 cursor-pointer accent-indigo-500">
+        </div>
+
+        <!-- Export CSV Button -->
+        <button id="exportCsvBtn" class="flex items-center gap-2 px-3 py-1.5 text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-white/10 transition shadow-sm">
+          <i class="fa-solid fa-download text-indigo-400"></i>
+          <span>Export CSV</span>
+        </button>
+
+        <!-- Theme Toggle -->
+        <button id="themeToggleBtn" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-white/10 transition" title="Toggle Light/Dark Theme">
+          <i class="fa-solid fa-sun text-amber-400 text-sm" id="themeIcon"></i>
+        </button>
+
+        <!-- Dataset Info Modal Trigger -->
+        <button id="datasetInfoBtn" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 rounded-lg border border-indigo-500/30 transition">
+          <i class="fa-solid fa-circle-info"></i>
+          <span>Dataset Info</span>
+        </button>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- Interactive Filters & Slicers Bar -->
+    <section class="glass-panel p-4 space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-3">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-sliders text-indigo-400 text-sm"></i>
+          <h2 class="text-sm font-semibold tracking-wide uppercase text-slate-300">Campaign Filters & Audience Slicers</h2>
+          <span id="activeFilterBadge" class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-medium">All 1,143 Ads</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <button id="resetFiltersBtn" class="flex items-center gap-1.5 text-xs text-rose-400 hover:text-rose-300 font-medium px-2.5 py-1 rounded bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 transition">
+            <i class="fa-solid fa-rotate-left"></i>
+            <span>Reset All Filters</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Controls Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+        
+        <!-- Campaign Selector -->
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1">Campaign ID</label>
+          <select id="campaignSelect" class="custom-select w-full">
+            <option value="all">All Campaigns (All 3)</option>
+            <option value="916">Campaign 916 (Test / 54 ads)</option>
+            <option value="936">Campaign 936 (Growth / 464 ads)</option>
+            <option value="1178">Campaign 1178 (Scale / 625 ads)</option>
+          </select>
+        </div>
+
+        <!-- Age Segment Selector -->
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1">Age Cohort</label>
+          <select id="ageSelect" class="custom-select w-full">
+            <option value="all">All Age Groups</option>
+            <option value="30-34">Age 30 - 34</option>
+            <option value="35-39">Age 35 - 39</option>
+            <option value="40-44">Age 40 - 44</option>
+            <option value="45-49">Age 45 - 49</option>
+          </select>
+        </div>
+
+        <!-- Gender Selector -->
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1">Target Gender</label>
+          <select id="genderSelect" class="custom-select w-full">
+            <option value="all">All Genders (M & F)</option>
+            <option value="M">Male (M)</option>
+            <option value="F">Female (F)</option>
+          </select>
+        </div>
+
+        <!-- Audience Interest Selector -->
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1">Audience Interest Code</label>
+          <select id="interestSelect" class="custom-select w-full">
+            <option value="all">All Interests (40 Categories)</option>
+            <!-- Populated dynamically via JS -->
+          </select>
+        </div>
+
+        <!-- Spend Minimum Filter -->
+        <div>
+          <div class="flex justify-between items-center mb-1">
+            <label class="text-xs font-medium text-slate-400">Min Ad Spend ($)</label>
+            <span id="spendFilterDisplay" class="text-xs font-mono font-medium text-indigo-400">≥ $0</span>
+          </div>
+          <input type="range" id="spendRangeInput" min="0" max="640" step="5" value="0" class="w-full">
+        </div>
+
+      </div>
+
+      <!-- Live Summary Bar -->
+      <div class="flex flex-wrap items-center justify-between text-xs text-slate-400 pt-2 border-t border-white/5">
+        <div id="filterSummaryText">Showing <strong class="text-white">1,143</strong> of 1,143 ads (100% of dataset)</div>
+        <div class="flex items-center gap-3">
+          <span>Target Audience Reach: <strong id="totalImpressionsReach" class="text-slate-200">213.4M</strong></span>
+          <span>•</span>
+          <span>Filtered Ad Spend: <strong id="totalSpendSummary" class="text-slate-200">$58,705</strong></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Dynamic Strategic Executive Insights Bar -->
+    <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+      
+      <div class="glass-panel p-3.5 flex items-start gap-3 border-l-4 border-l-emerald-500">
+        <div class="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 text-sm">
+          <i class="fa-solid fa-trophy"></i>
+        </div>
+        <div>
+          <div class="text-[11px] font-semibold uppercase tracking-wider text-emerald-400">Top Demographic Cohort</div>
+          <div id="insightDemographic" class="text-xs text-slate-200 font-medium mt-0.5">Age 30-34 delivers lowest CPA ($30.88) & highest purchase conversion rate.</div>
+        </div>
+      </div>
+
+      <div class="glass-panel p-3.5 flex items-start gap-3 border-l-4 border-l-indigo-500">
+        <div class="p-2 rounded-lg bg-indigo-500/10 text-indigo-400 text-sm">
+          <i class="fa-solid fa-scale-unbalanced"></i>
+        </div>
+        <div>
+          <div class="text-[11px] font-semibold uppercase tracking-wider text-indigo-400">Gender Efficiency Ratio</div>
+          <div id="insightGender" class="text-xs text-slate-200 font-medium mt-0.5">Females generate 62% of clicks, but Males convert to sales at 1.68x lower CPA.</div>
+        </div>
+      </div>
+
+      <div class="glass-panel p-3.5 flex items-start gap-3 border-l-4 border-l-purple-500">
+        <div class="p-2 rounded-lg bg-purple-500/10 text-purple-400 text-sm">
+          <i class="fa-solid fa-rocket"></i>
+        </div>
+        <div>
+          <div class="text-[11px] font-semibold uppercase tracking-wider text-purple-400">Campaign ROAS Champion</div>
+          <div id="insightCampaign" class="text-xs text-slate-200 font-medium mt-0.5">Campaign 916 achieved 16.0x ROAS; Campaign 1178 scaled volume but increased CPA to $63.83.</div>
+        </div>
+      </div>
+
+      <div class="glass-panel p-3.5 flex items-start gap-3 border-l-4 border-l-amber-500">
+        <div class="p-2 rounded-lg bg-amber-500/10 text-amber-400 text-sm">
+          <i class="fa-solid fa-lightbulb"></i>
+        </div>
+        <div>
+          <div class="text-[11px] font-semibold uppercase tracking-wider text-amber-400">Optimization Opportunity</div>
+          <div id="insightOptimization" class="text-xs text-slate-200 font-medium mt-0.5">Age 45-49 has highest CTR (0.022%) but lowest sales CR (CPA $99.76). Recommend landing page realignment.</div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Dynamic KPI Cards Grid (6 Essential Marketing Performance Pillars) -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+      
+      <!-- Card 1: Total Ad Spend -->
+      <div class="kpi-card blue">
+        <div class="flex items-center justify-between text-slate-400 text-xs font-medium mb-1">
+          <span>Total Ad Spend</span>
+          <i class="fa-solid fa-wallet text-blue-400"></i>
+        </div>
+        <div class="kpi-value text-2xl text-white" id="kpiSpend">$58,705</div>
+        <div class="mt-2 flex items-center justify-between text-[10.5px] text-slate-400 border-t border-white/5 pt-1.5">
+          <span>CPC: <strong id="kpiCpc" class="text-slate-200 font-mono">$1.54</strong></span>
+          <span>CPM: <strong id="kpiCpm" class="text-slate-200 font-mono">$0.28</strong></span>
+        </div>
+      </div>
+
+      <!-- Card 2: Gross Revenue -->
+      <div class="kpi-card emerald">
+        <div class="flex items-center justify-between text-slate-400 text-xs font-medium mb-1">
+          <span>Gross Revenue</span>
+          <i class="fa-solid fa-coins text-emerald-400"></i>
+        </div>
+        <div class="kpi-value text-2xl text-emerald-400" id="kpiRevenue">$107,900</div>
+        <div class="mt-2 flex items-center justify-between text-[10.5px] text-slate-400 border-t border-white/5 pt-1.5">
+          <span>Net Profit:</span>
+          <strong id="kpiProfit" class="text-emerald-300 font-mono">+$49,195</strong>
+        </div>
+      </div>
+
+      <!-- Card 3: Campaign ROI & ROAS -->
+      <div class="kpi-card purple">
+        <div class="flex items-center justify-between text-slate-400 text-xs font-medium mb-1">
+          <span>Campaign ROI</span>
+          <i class="fa-solid fa-arrow-trend-up text-purple-400"></i>
+        </div>
+        <div class="kpi-value text-2xl text-purple-400" id="kpiRoi">+83.8%</div>
+        <div class="mt-2 flex items-center justify-between text-[10.5px] text-slate-400 border-t border-white/5 pt-1.5">
+          <span>ROAS Multiple:</span>
+          <strong id="kpiRoas" class="text-purple-300 font-mono">1.84x</strong>
+        </div>
+      </div>
+
+      <!-- Card 4: Impressions & Clicks -->
+      <div class="kpi-card">
+        <div class="flex items-center justify-between text-slate-400 text-xs font-medium mb-1">
+          <span>Clicks & CTR</span>
+          <i class="fa-solid fa-mouse-pointer text-indigo-400"></i>
+        </div>
+        <div class="kpi-value text-2xl text-white" id="kpiClicks">38,165</div>
+        <div class="mt-2 flex items-center justify-between text-[10.5px] text-slate-400 border-t border-white/5 pt-1.5">
+          <span>CTR: <strong id="kpiCtr" class="text-indigo-300 font-mono">0.018%</strong></span>
+          <span>Impr: <strong id="kpiImpressionsShort" class="text-slate-200 font-mono">213.4M</strong></span>
+        </div>
+      </div>
+
+      <!-- Card 5: Inquiries / Leads -->
+      <div class="kpi-card amber">
+        <div class="flex items-center justify-between text-slate-400 text-xs font-medium mb-1">
+          <span>Inquiries (Leads)</span>
+          <i class="fa-solid fa-envelope-open-text text-amber-400"></i>
+        </div>
+        <div class="kpi-value text-2xl text-amber-400" id="kpiLeads">3,264</div>
+        <div class="mt-2 flex items-center justify-between text-[10.5px] text-slate-400 border-t border-white/5 pt-1.5">
+          <span>CR: <strong id="kpiLeadCr" class="text-amber-300 font-mono">8.55%</strong></span>
+          <span>CPL: <strong id="kpiCpl" class="text-slate-200 font-mono">$17.99</strong></span>
+        </div>
+      </div>
+
+      <!-- Card 6: Approved Sales & CPA -->
+      <div class="kpi-card rose">
+        <div class="flex items-center justify-between text-slate-400 text-xs font-medium mb-1">
+          <span>Approved Sales</span>
+          <i class="fa-solid fa-bag-shopping text-rose-400"></i>
+        </div>
+        <div class="kpi-value text-2xl text-rose-400" id="kpiApprovedSales">1,079</div>
+        <div class="mt-2 flex items-center justify-between text-[10.5px] text-slate-400 border-t border-white/5 pt-1.5">
+          <span>CR: <strong id="kpiSalesCr" class="text-rose-300 font-mono">2.83%</strong></span>
+          <span>CPA: <strong id="kpiCpa" class="text-slate-200 font-mono">$54.41</strong></span>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Tabbed Navigation Bar -->
+    <div class="flex flex-wrap gap-2 border-b border-white/10 pb-2">
+      <button class="tab-btn active px-4 py-2 text-xs font-semibold rounded-lg text-slate-300 hover:text-white transition flex items-center gap-2" data-tab="funnelTab">
+        <i class="fa-solid fa-filter"></i>
+        <span>Marketing Funnel & Conversion</span>
+      </button>
+      <button class="tab-btn px-4 py-2 text-xs font-semibold rounded-lg text-slate-300 hover:text-white transition flex items-center gap-2" data-tab="campaignTab">
+        <i class="fa-solid fa-bullhorn"></i>
+        <span>Campaign ROI & Scaling</span>
+      </button>
+      <button class="tab-btn px-4 py-2 text-xs font-semibold rounded-lg text-slate-300 hover:text-white transition flex items-center gap-2" data-tab="segmentTab">
+        <i class="fa-solid fa-users-viewfinder"></i>
+        <span>Customer Segments (Age & Gender)</span>
+      </button>
+      <button class="tab-btn px-4 py-2 text-xs font-semibold rounded-lg text-slate-300 hover:text-white transition flex items-center gap-2" data-tab="interestTab">
+        <i class="fa-solid fa-fingerprint"></i>
+        <span>Audience Interests & Ad Matrix</span>
+      </button>
+      <button class="tab-btn px-4 py-2 text-xs font-semibold rounded-lg text-slate-300 hover:text-white transition flex items-center gap-2" data-tab="tableTab">
+        <i class="fa-solid fa-table-list"></i>
+        <span>Granular Ad Explorer (<span id="tableTabCount">1,143</span>)</span>
+      </button>
+    </div>
+
+    <!-- TAB 1: Marketing Funnel & Conversion -->
+    <div id="funnelTab" class="tab-content space-y-6">
+      
+      <!-- Visual 4-Stage Marketing Funnel Flow -->
+      <div class="glass-panel p-5">
+        <div class="flex flex-wrap items-center justify-between mb-4">
+          <div>
+            <h3 class="text-sm font-bold text-white uppercase tracking-wider">End-to-End Marketing Conversion Funnel</h3>
+            <p class="text-xs text-slate-400">Step-by-step conversion tracking from raw ad impressions to paid approved acquisitions</p>
+          </div>
+          <div class="text-xs font-mono text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded border border-indigo-500/20">
+            Overall Funnel Conversion: <span id="funnelOverallCr" class="font-bold">0.0005%</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          
+          <!-- Funnel Step 1: Impressions -->
+          <div class="funnel-step p-4 rounded-xl bg-slate-800/50 border border-white/5 relative">
+            <div class="flex items-center justify-between text-xs text-slate-400 mb-1">
+              <span class="font-semibold text-blue-400">Stage 1: Impressions</span>
+              <i class="fa-solid fa-eye text-blue-400"></i>
+            </div>
+            <div class="text-xl font-bold font-mono text-white" id="funnelImpressions">213,434,828</div>
+            <div class="text-[11px] text-slate-400 mt-1">Total Ad Exposures</div>
+            <div class="mt-3 text-xs bg-slate-900/60 p-2 rounded border border-white/5 text-slate-300 flex justify-between">
+              <span>Next Stage CTR:</span>
+              <strong id="funnelCtrValue" class="text-indigo-400 font-mono">0.018%</strong>
+            </div>
+          </div>
+
+          <!-- Funnel Step 2: Clicks -->
+          <div class="funnel-step p-4 rounded-xl bg-slate-800/50 border border-white/5 relative">
+            <div class="flex items-center justify-between text-xs text-slate-400 mb-1">
+              <span class="font-semibold text-indigo-400">Stage 2: Ad Clicks</span>
+              <i class="fa-solid fa-arrow-pointer text-indigo-400"></i>
+            </div>
+            <div class="text-xl font-bold font-mono text-white" id="funnelClicks">38,165</div>
+            <div class="text-[11px] text-slate-400 mt-1">Visitor Traffic Generated</div>
+            <div class="mt-3 text-xs bg-slate-900/60 p-2 rounded border border-white/5 text-slate-300 flex justify-between">
+              <span>Click to Inquiry CR:</span>
+              <strong id="funnelInquiryCrValue" class="text-amber-400 font-mono">8.55%</strong>
+            </div>
+          </div>
+
+          <!-- Funnel Step 3: Inquiries (Total Conversion) -->
+          <div class="funnel-step p-4 rounded-xl bg-slate-800/50 border border-white/5 relative">
+            <div class="flex items-center justify-between text-xs text-slate-400 mb-1">
+              <span class="font-semibold text-amber-400">Stage 3: Inquiries (Leads)</span>
+              <i class="fa-solid fa-comments text-amber-400"></i>
+            </div>
+            <div class="text-xl font-bold font-mono text-white" id="funnelInquiries">3,264</div>
+            <div class="text-[11px] text-slate-400 mt-1">Expressed Buyer Intent</div>
+            <div class="mt-3 text-xs bg-slate-900/60 p-2 rounded border border-white/5 text-slate-300 flex justify-between">
+              <span>Lead Close Rate:</span>
+              <strong id="funnelLeadCloseRate" class="text-emerald-400 font-mono">33.06%</strong>
+            </div>
+          </div>
+
+          <!-- Funnel Step 4: Approved Conversion (Sales) -->
+          <div class="funnel-step p-4 rounded-xl bg-slate-800/50 border border-white/5 relative">
+            <div class="flex items-center justify-between text-xs text-slate-400 mb-1">
+              <span class="font-semibold text-emerald-400">Stage 4: Approved Purchases</span>
+              <i class="fa-solid fa-circle-check text-emerald-400"></i>
+            </div>
+            <div class="text-xl font-bold font-mono text-white" id="funnelSales">1,079</div>
+            <div class="text-[11px] text-slate-400 mt-1">Paying Customers Acquired</div>
+            <div class="mt-3 text-xs bg-slate-900/60 p-2 rounded border border-white/5 text-slate-300 flex justify-between">
+              <span>Customer CPA:</span>
+              <strong id="funnelCpaValue" class="text-emerald-300 font-mono">$54.41</strong>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Funnel Charts Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- Chart: Funnel Volume Drop-off -->
+        <div class="glass-panel p-4">
+          <div class="flex items-center justify-between mb-3">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-300">Funnel Volume (Logarithmic Scale)</h4>
+            <span class="text-[11px] text-slate-400">Drop-off between stages</span>
+          </div>
+          <div class="h-72">
+            <canvas id="funnelVolumeChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Chart: Conversion Rates Across Cohorts -->
+        <div class="glass-panel p-4">
+          <div class="flex items-center justify-between mb-3">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-300">Conversion Rates & Efficiency Metrics</h4>
+            <span class="text-[11px] text-slate-400">CTR vs Lead CR vs Sales CR</span>
+          </div>
+          <div class="h-72">
+            <canvas id="funnelRatesChart"></canvas>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- TAB 2: Campaign ROI & Scaling Analysis -->
+    <div id="campaignTab" class="tab-content hidden space-y-6">
+      
+      <!-- Campaign Executive Matrix Table -->
+      <div class="glass-panel p-4">
+        <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-3">Campaign Benchmark Matrix (XYZ Strategic Campaigns)</h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs text-left">
+            <thead class="bg-slate-800/80 text-slate-400 uppercase font-mono border-b border-white/10">
+              <tr>
+                <th class="py-2.5 px-3">Campaign</th>
+                <th class="py-2.5 px-3">Stage / Role</th>
+                <th class="py-2.5 px-3 text-right">Ad Units</th>
+                <th class="py-2.5 px-3 text-right">Ad Spend</th>
+                <th class="py-2.5 px-3 text-right">Clicks</th>
+                <th class="py-2.5 px-3 text-right">CTR</th>
+                <th class="py-2.5 px-3 text-right">CPC</th>
+                <th class="py-2.5 px-3 text-right">Sales</th>
+                <th class="py-2.5 px-3 text-right">CPA</th>
+                <th class="py-2.5 px-3 text-right">Gross Rev</th>
+                <th class="py-2.5 px-3 text-right">ROAS</th>
+                <th class="py-2.5 px-3 text-right">Campaign ROI</th>
+              </tr>
+            </thead>
+            <tbody id="campaignBenchmarkBody" class="divide-y divide-white/5 font-mono">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Campaign Comparison Charts -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- Spend vs Revenue Chart -->
+        <div class="glass-panel p-4">
+          <div class="flex items-center justify-between mb-3">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-300">Campaign Ad Spend vs Gross Revenue</h4>
+            <span class="text-[11px] text-slate-400">Monetary Scale</span>
+          </div>
+          <div class="h-72">
+            <canvas id="campaignRevenueChart"></canvas>
+          </div>
+        </div>
+
+        <!-- ROAS & CPA Comparison -->
+        <div class="glass-panel p-4">
+          <div class="flex items-center justify-between mb-3">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-300">ROAS vs Customer Acquisition Cost (CPA)</h4>
+            <span class="text-[11px] text-slate-400">Efficiency Divergence</span>
+          </div>
+          <div class="h-72">
+            <canvas id="campaignRoasChart"></canvas>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- TAB 3: Customer Segments (Demographics: Age & Gender) -->
+    <div id="segmentTab" class="tab-content hidden space-y-6">
+      
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- Age Demographics Performance Chart -->
+        <div class="glass-panel p-4">
+          <div class="flex items-center justify-between mb-3">
+            <div>
+              <h4 class="text-xs font-bold uppercase tracking-wider text-slate-300">Age Cohort Performance Matrix</h4>
+              <p class="text-[11px] text-slate-400">Total Spend ($) vs Sales Acquisitions vs CPA ($)</p>
+            </div>
+            <span class="badge-indigo text-[10px] px-2 py-0.5 rounded-full font-mono">4 Cohorts</span>
+          </div>
+          <div class="h-80">
+            <canvas id="ageDemographicsChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Gender Performance Split & Efficiency Paradox -->
+        <div class="glass-panel p-4">
+          <div class="flex items-center justify-between mb-3">
+            <div>
+              <h4 class="text-xs font-bold uppercase tracking-wider text-slate-300">Gender Conversion Efficiency Paradox</h4>
+              <p class="text-[11px] text-slate-400">Comparing Click Volume vs Approved Purchases</p>
+            </div>
+            <span class="badge-emerald text-[10px] px-2 py-0.5 rounded-full font-mono">M vs F</span>
+          </div>
+          <div class="grid grid-cols-2 gap-2 h-80">
+            <div class="h-full flex flex-col items-center">
+              <span class="text-[11px] text-slate-400 mb-1">Clicks Share</span>
+              <div class="h-64 w-full">
+                <canvas id="genderClicksChart"></canvas>
+              </div>
+            </div>
+            <div class="h-full flex flex-col items-center">
+              <span class="text-[11px] text-slate-400 mb-1">Approved Purchases Share</span>
+              <div class="h-64 w-full">
+                <canvas id="genderSalesChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Demographics Deep Dive Table -->
+      <div class="glass-panel p-4">
+        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-300 mb-3">Demographic Sub-Segment Performance Summary</h4>
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs text-left font-mono">
+            <thead class="bg-slate-800/80 text-slate-400 uppercase border-b border-white/10">
+              <tr>
+                <th class="py-2 px-3">Segment</th>
+                <th class="py-2 px-3 text-right">Ads Count</th>
+                <th class="py-2 px-3 text-right">Impressions</th>
+                <th class="py-2 px-3 text-right">Clicks</th>
+                <th class="py-2 px-3 text-right">CTR</th>
+                <th class="py-2 px-3 text-right">Ad Spend</th>
+                <th class="py-2 px-3 text-right">CPC</th>
+                <th class="py-2 px-3 text-right">Approved Sales</th>
+                <th class="py-2 px-3 text-right">Sales CR</th>
+                <th class="py-2 px-3 text-right">CPA</th>
+                <th class="py-2 px-3 text-right">ROAS</th>
+              </tr>
+            </thead>
+            <tbody id="demographicsTableBody" class="divide-y divide-white/5">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- TAB 4: Audience Interests & Ad Matrix -->
+    <div id="interestTab" class="tab-content hidden space-y-6">
+      
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- Top 12 Interests by Sales -->
+        <div class="glass-panel p-4">
+          <div class="flex items-center justify-between mb-3">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-300">Top 12 Audience Interests (by Approved Purchases)</h4>
+            <span class="text-[11px] text-slate-400">Ranked by Volume & CPA</span>
+          </div>
+          <div class="h-80">
+            <canvas id="topInterestsChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Ad Spend vs Purchases Scatter Plot -->
+        <div class="glass-panel p-4">
+          <div class="flex items-center justify-between mb-3">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-300">Ad Efficiency Correlation (Spend vs Approved Purchases)</h4>
+            <span class="text-[11px] text-slate-400">Outlier Discovery Matrix</span>
+          </div>
+          <div class="h-80">
+            <canvas id="adScatterChart"></canvas>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Interest Category Performance Table -->
+      <div class="glass-panel p-4">
+        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-300 mb-3">Top Audience Interest Categories Breakdown</h4>
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs text-left font-mono">
+            <thead class="bg-slate-800/80 text-slate-400 uppercase border-b border-white/10">
+              <tr>
+                <th class="py-2 px-3">Interest ID</th>
+                <th class="py-2 px-3 text-right">Ad Placements</th>
+                <th class="py-2 px-3 text-right">Ad Spend</th>
+                <th class="py-2 px-3 text-right">Clicks</th>
+                <th class="py-2 px-3 text-right">Inquiries</th>
+                <th class="py-2 px-3 text-right">Approved Purchases</th>
+                <th class="py-2 px-3 text-right">CPA ($)</th>
+                <th class="py-2 px-3 text-right">ROAS</th>
+                <th class="py-2 px-3 text-right">ROI (%)</th>
+              </tr>
+            </thead>
+            <tbody id="interestsTableBody" class="divide-y divide-white/5">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- TAB 5: Granular Ad Explorer (Data Table) -->
+    <div id="tableTab" class="tab-content hidden space-y-4">
+      
+      <!-- Table Filter Bar -->
+      <div class="glass-panel p-3 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-3 flex-1 min-w-[260px]">
+          <div class="relative w-full max-w-sm">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+            <input type="text" id="tableSearchInput" placeholder="Search by Ad ID, Campaign or Segment..." class="custom-input pl-8 text-xs w-full">
+          </div>
+          <span class="text-xs text-slate-400 whitespace-nowrap">Sort By:</span>
+          <select id="tableSortSelect" class="custom-select text-xs">
+            <option value="Spent_desc">Spend (High → Low)</option>
+            <option value="Approved_Conversion_desc">Sales (High → Low)</option>
+            <option value="Clicks_desc">Clicks (High → Low)</option>
+            <option value="Impressions_desc">Impressions (High → Low)</option>
+            <option value="cpa_asc">CPA (Best / Low → High)</option>
+            <option value="roas_desc">ROAS (High → Low)</option>
+          </select>
+        </div>
+
+        <div class="flex items-center gap-2 text-xs text-slate-400">
+          <span>Rows per page:</span>
+          <select id="tablePageSizeSelect" class="custom-select text-xs py-1">
+            <option value="15">15</option>
+            <option value="30">30</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Table Content -->
+      <div class="glass-panel overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs text-left font-mono">
+            <thead class="bg-slate-800/90 text-slate-400 uppercase text-[11px] border-b border-white/10">
+              <tr>
+                <th class="py-2.5 px-3">Ad ID</th>
+                <th class="py-2.5 px-3">Campaign</th>
+                <th class="py-2.5 px-3">FB Camp</th>
+                <th class="py-2.5 px-3">Age</th>
+                <th class="py-2.5 px-3">Gen</th>
+                <th class="py-2.5 px-3 text-right">Interest</th>
+                <th class="py-2.5 px-3 text-right">Impressions</th>
+                <th class="py-2.5 px-3 text-right">Clicks</th>
+                <th class="py-2.5 px-3 text-right">CTR</th>
+                <th class="py-2.5 px-3 text-right">Spend</th>
+                <th class="py-2.5 px-3 text-right">Inquiries</th>
+                <th class="py-2.5 px-3 text-right">Sales</th>
+                <th class="py-2.5 px-3 text-right">CPA</th>
+                <th class="py-2.5 px-3 text-right">ROAS</th>
+              </tr>
+            </thead>
+            <tbody id="adTableBody" class="divide-y divide-white/5">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination Controls -->
+        <div class="p-3 bg-slate-800/40 border-t border-white/5 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400">
+          <div id="tablePaginationInfo">Showing 1 to 15 of 1,143 records</div>
+          <div class="flex items-center gap-1.5" id="tablePaginationButtons">
+            <!-- Dynamically populated buttons -->
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Dataset & Methodology Information Modal -->
+  <div id="datasetModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="glass-panel bg-[#0f172a] max-w-2xl w-full p-6 rounded-2xl border border-white/20 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+      
+      <div class="flex items-center justify-between border-b border-white/10 pb-3">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-database text-indigo-400"></i>
+          <h3 class="text-base font-bold text-white">Dataset Citation & Metric Methodology</h3>
+        </div>
+        <button id="closeModalBtn" class="text-slate-400 hover:text-white text-lg">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3 text-xs text-slate-300 leading-relaxed">
+        <p><strong class="text-white">Dataset Name:</strong> Kaggle Clicks Conversion Tracking (XYZ Company Social Media Ad Campaigns)</p>
+        <p><strong class="text-white">Source & Attribution:</strong> Anonymized real-world advertising campaign dataset widely cited in marketing analytics and predictive data science (1,143 records, 11 features).</p>
+        
+        <div class="bg-slate-800/60 p-3 rounded-lg border border-white/5 space-y-1">
+          <div class="font-semibold text-indigo-300 uppercase text-[11px] mb-1">Available Attributes:</div>
+          <div><code class="text-emerald-400">ad_id</code>: Unique identifier for each individual ad unit.</div>
+          <div><code class="text-emerald-400">xyz_campaign_id</code>: ID associated with each ad campaign of XYZ company (916, 936, 1178).</div>
+          <div><code class="text-emerald-400">fb_campaign_id</code>: Facebook advertising platform campaign tracking identifier.</div>
+          <div><code class="text-emerald-400">age</code>: Demographic target age group ('30-34', '35-39', '40-44', '45-49').</div>
+          <div><code class="text-emerald-400">gender</code>: Target audience gender ('M', 'F').</div>
+          <div><code class="text-emerald-400">interest</code>: Audience interest category code (40 unique segments).</div>
+          <div><code class="text-emerald-400">Impressions</code>: Number of times each ad was rendered/displayed.</div>
+          <div><code class="text-emerald-400">Clicks</code>: Number of times users clicked on the ad unit.</div>
+          <div><code class="text-emerald-400">Spent</code>: Exact ad spend ($ USD) billed by Facebook to company XYZ.</div>
+          <div><code class="text-emerald-400">Total_Conversion</code>: Initial inquiries or signups after viewing the ad (Lead stage).</div>
+          <div><code class="text-emerald-400">Approved_Conversion</code>: Actual confirmed purchases/paying buyers (Customer stage).</div>
+        </div>
+
+        <div class="bg-slate-800/60 p-3 rounded-lg border border-white/5 space-y-1.5">
+          <div class="font-semibold text-emerald-300 uppercase text-[11px]">Marketing Metrics Formula Specification:</div>
+          <div>• <strong>Click-Through Rate (CTR):</strong> <code>(Clicks / Impressions) × 100%</code></div>
+          <div>• <strong>Cost Per Click (CPC):</strong> <code>Spent / Clicks</code></div>
+          <div>• <strong>Cost Per Mille (CPM):</strong> <code>(Spent / Impressions) × 1,000</code></div>
+          <div>• <strong>Lead Conversion Rate (Lead CR):</strong> <code>(Total_Conversion / Clicks) × 100%</code></div>
+          <div>• <strong>Sales Conversion Rate (Sales CR):</strong> <code>(Approved_Conversion / Clicks) × 100%</code></div>
+          <div>• <strong>Customer Acquisition Cost (CPA):</strong> <code>Spent / Approved_Conversion</code></div>
+          <div>• <strong>Gross Revenue:</strong> <code>Approved_Conversion × Target Customer Value (AOV)</code></div>
+          <div>• <strong>Campaign Net Profit:</strong> <code>Gross Revenue - Spent</code></div>
+          <div>• <strong>Return on Ad Spend (ROAS):</strong> <code>Gross Revenue / Spent</code></div>
+          <div>• <strong>Campaign ROI (%):</strong> <code>((Gross Revenue - Spent) / Spent) × 100%</code></div>
+        </div>
+
+        <div class="p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg text-amber-300">
+          <strong>Transparency Notice on Dates & Revenue:</strong> The original public Facebook dataset records aggregate campaign-level ad exposures rather than continuous calendar day timestamps. Channel is Facebook Ads across 3 strategic campaign phases. Revenue is mathematically modeled from real <code>Approved_Conversion</code> orders multiplied by the customizable Customer Value / AOV slider ($10 to $300, default $100), ensuring transparent, rigorous financial simulation without fabricating ungrounded row-level numbers.
+        </div>
+      </div>
+
+      <div class="text-right pt-2 border-t border-white/10">
+        <button id="modalOkBtn" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-lg transition">
+          Understood & Close
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="border-t border-white/10 bg-[#0f172a] py-6 mt-12 text-slate-400 text-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-wrap items-center justify-between gap-4">
+      <div>
+        <span class="font-semibold text-slate-200">Marketing Campaign Analytics Dashboard</span>
+        <span class="mx-2">•</span>
+        <span>Built with HTML5, Tailwind CSS, Vanilla JavaScript & Chart.js</span>
+      </div>
+      <div class="flex items-center gap-4">
+        <span>Public Dataset: Kaggle Conversion Tracking</span>
+        <span>•</span>
+        <span class="text-indigo-400">Ready for GitHub Pages</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Include Dataset Script -->
+  <script src="data.js"></script>
+
+  <!-- Application Logic -->
+  <script src="app.js"></script>
+</body>
+</html>
