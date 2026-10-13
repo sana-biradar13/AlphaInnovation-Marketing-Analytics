@@ -1,238 +1,274 @@
-/* Modern Executive Dashboard Custom Styling */
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+/* Power BI Native Styling Engine */
+@import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@300;400;600;700&display=swap');
 
 :root {
-  --font-main: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
-  --bg-primary: #0a0f1d;
-  --bg-secondary: #0f172a;
-  --bg-card: rgba(17, 24, 39, 0.75);
-  --bg-card-hover: rgba(30, 41, 59, 0.85);
-  --border-color: rgba(255, 255, 255, 0.08);
-  --border-focus: rgba(99, 102, 241, 0.5);
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
-  --accent-blue: #3b82f6;
-  --accent-indigo: #6366f1;
-  --accent-purple: #8b5cf6;
-  --accent-emerald: #10b981;
-  --accent-amber: #f59e0b;
-  --accent-rose: #f43f5e;
-  --accent-cyan: #06b6d4;
-  --glow-indigo: rgba(99, 102, 241, 0.15);
-  --glow-emerald: rgba(16, 185, 129, 0.15);
-}
-
-.light-theme {
-  --bg-primary: #f8fafc;
-  --bg-secondary: #ffffff;
-  --bg-card: rgba(255, 255, 255, 0.9);
-  --bg-card-hover: rgba(241, 245, 249, 1);
-  --border-color: rgba(226, 232, 240, 0.9);
-  --border-focus: rgba(99, 102, 241, 0.6);
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-muted: #94a3b8;
-  --glow-indigo: rgba(99, 102, 241, 0.08);
-  --glow-emerald: rgba(16, 185, 129, 0.08);
+  --pbi-font: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+  --pbi-canvas-bg: #f0f2f5;
+  --pbi-card-bg: #ffffff;
+  --pbi-card-border: #e1e3e6;
+  --pbi-text-title: #252423;
+  --pbi-text-sub: #605e5c;
+  --pbi-text-muted: #8a8886;
+  --pbi-accent: #f2c811; /* Power BI Yellow */
+  --pbi-blue-1: #118dff;
+  --pbi-blue-2: #12239e;
+  --pbi-orange: #e66c37;
+  --pbi-purple: #6b007b;
+  --pbi-pink: #e044a7;
+  --pbi-teal: #008272;
+  --pbi-green: #107c41;
+  --pbi-red: #d64550;
+  --pbi-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 1px 2px -1px rgba(0, 0, 0, 0.08);
+  --pbi-shadow-hover: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
 }
 
 * {
   box-sizing: border-box;
-  font-family: var(--font-main);
-  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.15s ease;
+  font-family: var(--pbi-font);
 }
 
 body {
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
+  background-color: var(--pbi-canvas-bg);
+  color: var(--pbi-text-title);
   margin: 0;
   padding: 0;
-  min-height: 100vh;
+  overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
 }
 
-/* Glassmorphism Card Style */
-.glass-panel {
-  background: var(--bg-card);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--border-color);
-  border-radius: 14px;
+/* Power BI Top Ribbon / Nav */
+.pbi-app-bar {
+  background-color: #2b2b2b;
+  color: #ffffff;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
 }
 
-.glass-panel:hover {
-  border-color: rgba(255, 255, 255, 0.14);
+.pbi-logo-badge {
+  background-color: var(--pbi-accent);
+  color: #000000;
+  width: 22px;
+  height: 22px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 13px;
 }
 
-.light-theme .glass-panel:hover {
-  border-color: rgba(99, 102, 241, 0.25);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.04);
-}
-
-/* KPI Card Accents */
-.kpi-card {
+/* Power BI Visual Card Container */
+.pbi-visual-card {
+  background: var(--pbi-card-bg);
+  border: 1px solid var(--pbi-card-border);
+  border-radius: 4px;
+  box-shadow: var(--pbi-shadow);
+  display: flex;
+  flex-direction: column;
   position: relative;
-  overflow: hidden;
-  border-radius: 12px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  padding: 1.25rem;
+  transition: box-shadow 0.15s ease;
 }
 
-.kpi-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, var(--accent-indigo), var(--accent-purple));
-  opacity: 0.8;
+.pbi-visual-card:hover {
+  box-shadow: var(--pbi-shadow-hover);
 }
 
-.kpi-card.emerald::before {
-  background: linear-gradient(90deg, #10b981, #059669);
+/* Visual Header (Power BI style title bar with action icons) */
+.pbi-visual-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px 4px 12px;
+  border-bottom: 1px solid transparent;
 }
 
-.kpi-card.blue::before {
-  background: linear-gradient(90deg, #3b82f6, #06b6d4);
+.pbi-visual-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--pbi-text-title);
+  letter-spacing: -0.01em;
 }
 
-.kpi-card.purple::before {
-  background: linear-gradient(90deg, #8b5cf6, #ec4899);
+.pbi-visual-subtitle {
+  font-size: 11px;
+  color: var(--pbi-text-sub);
+  margin-top: -2px;
+  padding: 0 12px 6px 12px;
 }
 
-.kpi-card.amber::before {
-  background: linear-gradient(90deg, #f59e0b, #d97706);
+.pbi-visual-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  opacity: 0.35;
+  transition: opacity 0.15s ease;
 }
 
-.kpi-card.rose::before {
-  background: linear-gradient(90deg, #f43f5e, #e11d48);
+.pbi-visual-card:hover .pbi-visual-actions {
+  opacity: 1;
 }
 
-.kpi-value {
-  font-family: var(--font-mono);
+.pbi-action-icon {
+  font-size: 11px;
+  color: var(--pbi-text-sub);
+  cursor: pointer;
+  padding: 3px;
+}
+
+.pbi-action-icon:hover {
+  color: var(--pbi-blue-1);
+}
+
+/* Power BI KPI Callout Card */
+.pbi-kpi-card {
+  padding: 10px 14px;
+  background: #ffffff;
+  border: 1px solid var(--pbi-card-border);
+  border-radius: 4px;
+  box-shadow: var(--pbi-shadow);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 86px;
+}
+
+.pbi-kpi-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--pbi-text-sub);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.pbi-kpi-value {
+  font-size: 24px;
   font-weight: 700;
-  letter-spacing: -0.03em;
+  color: var(--pbi-text-title);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
 }
 
-/* Custom Scrollbars */
+.pbi-kpi-subtext {
+  font-size: 11px;
+  color: var(--pbi-text-sub);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Power BI Slicer Tiles & Selects */
+.pbi-slicer-tile {
+  background: #f8f9fa;
+  border: 1px solid #d1d5db;
+  color: #374151;
+  padding: 4px 10px;
+  border-radius: 3px;
+  font-size: 11.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.1s ease;
+  user-select: none;
+}
+
+.pbi-slicer-tile:hover {
+  background: #e5e7eb;
+  border-color: #9ca3af;
+}
+
+.pbi-slicer-tile.active {
+  background: #118dff;
+  border-color: #0b69c4;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.pbi-select {
+  background-color: #ffffff;
+  border: 1px solid #d1d5db;
+  color: #1f2937;
+  border-radius: 3px;
+  padding: 4px 8px;
+  font-size: 12px;
+  outline: none;
+}
+
+.pbi-select:focus {
+  border-color: #118dff;
+  box-shadow: 0 0 0 1px #118dff;
+}
+
+/* Matrix Table in Power BI */
+.pbi-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11.5px;
+}
+
+.pbi-table th {
+  background-color: #faf9f8;
+  color: #605e5c;
+  font-weight: 600;
+  text-align: left;
+  padding: 6px 8px;
+  border-bottom: 1px solid #e1e3e6;
+  white-space: nowrap;
+}
+
+.pbi-table td {
+  padding: 5px 8px;
+  border-bottom: 1px solid #f3f2f1;
+  color: #252423;
+  white-space: nowrap;
+}
+
+.pbi-table tr:hover {
+  background-color: #f3f7fa;
+}
+
+/* Power BI Bottom Page Tabs Bar */
+.pbi-page-bar {
+  background-color: #ffffff;
+  border-top: 1px solid #e1e3e6;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  font-size: 11.5px;
+  color: #605e5c;
+}
+
+.pbi-tab-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 14px;
+  height: 100%;
+  border-bottom: 3px solid #f2c811;
+  color: #252423;
+  font-weight: 600;
+  background-color: #f8f9fa;
+}
+
+/* Custom Scrollbar for visual cards */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(15, 23, 42, 0.5);
+  background: #f1f1f1;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.3);
-  border-radius: 9999px;
+  background: #c1c1c1;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.5);
-}
-
-/* Range Input Styling */
-input[type="range"] {
-  -webkit-appearance: none;
-  width: 100%;
-  height: 6px;
-  border-radius: 4px;
-  background: #334155;
-  outline: none;
-}
-
-input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: #6366f1;
-  cursor: pointer;
-  border: 2px solid #ffffff;
-  box-shadow: 0 0 10px rgba(99, 102, 241, 0.6);
-  transition: transform 0.1s ease;
-}
-
-input[type="range"]::-webkit-slider-thumb:hover {
-  transform: scale(1.2);
-}
-
-/* Custom Select & Inputs */
-.custom-select, .custom-input {
-  background-color: rgba(15, 23, 42, 0.7);
-  border: 1px solid var(--border-color);
-  color: var(--text-primary);
-  border-radius: 8px;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
-  outline: none;
-}
-
-.light-theme .custom-select, .light-theme .custom-input {
-  background-color: #f1f5f9;
-  border-color: #cbd5e1;
-}
-
-.custom-select:focus, .custom-input:focus {
-  border-color: #6366f1;
-  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
-}
-
-/* Active tab style */
-.tab-btn.active {
-  background: #6366f1;
-  color: #ffffff;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
-}
-
-/* Badge styling */
-.badge-indigo {
-  background: rgba(99, 102, 241, 0.15);
-  color: #818cf8;
-  border: 1px solid rgba(99, 102, 241, 0.3);
-}
-
-.badge-emerald {
-  background: rgba(16, 185, 129, 0.15);
-  color: #34d399;
-  border: 1px solid rgba(16, 185, 129, 0.3);
-}
-
-.badge-amber {
-  background: rgba(245, 158, 11, 0.15);
-  color: #fbbf24;
-  border: 1px solid rgba(245, 158, 11, 0.3);
-}
-
-.badge-rose {
-  background: rgba(244, 63, 94, 0.15);
-  color: #fb7185;
-  border: 1px solid rgba(244, 63, 94, 0.3);
-}
-
-/* Animation utilities */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-/* Funnel chart special layout */
-.funnel-step {
-  position: relative;
-  transition: all 0.2s ease;
-}
-
-.funnel-step:hover {
-  transform: translateY(-2px);
+  background: #a8a8a8;
 }
