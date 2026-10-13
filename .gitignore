@@ -1,0 +1,11 @@
+# Node / Test scripts
+test_*.js
+capture_*.js
+open_pbix.py
+screenshot_*.png
+
+# OS / Editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
